@@ -40,6 +40,7 @@ INSTALLED_APPS = [
 
     # Extensions
     'rest_framework',
+    'rest_framework.authtoken',
 
     # My own apps
     'api',
