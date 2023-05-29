@@ -10,10 +10,10 @@ from .models import Product
 from .serializers import ProductSerializer
 from api.permissions import IsStaffEditorPermissions
 from api.authentication import TokenAuthentication
-from api.mixins import StaffEditorPermissionMixin
+from api.mixins import StaffEditorPermissionMixin, UserQuerySetMixin
 
 # Kazde takie APIView sklada sie z mixinow (zobacz implementacje)
-class ProductListCreateAPIView(StaffEditorPermissionMixin, generics.ListCreateAPIView):
+class ProductListCreateAPIView(UserQuerySetMixin, StaffEditorPermissionMixin, generics.ListCreateAPIView):
     queryset = Product.objects.all()
     serializer_class = ProductSerializer
 
@@ -23,16 +23,25 @@ class ProductListCreateAPIView(StaffEditorPermissionMixin, generics.ListCreateAP
         content = serializer.validated_data.get('content')
         if content is None:
             content = title
-        serializer.save(content=content)
+        serializer.save(user=self.request.user, content=content)
+
+    # def get_queryset(self, *args, **kwargs):
+    #     qs = super().get_queryset(*args, **kwargs)
+    #     request = self.request
+    #     user = request.user
+    #     if not user.is_authenticated:
+    #         return qs.none()
+    #     return qs.filter(user=user)
+        
 
 
-class ProductDetailAPIView(StaffEditorPermissionMixin, generics.RetrieveAPIView):
+class ProductDetailAPIView(UserQuerySetMixin, StaffEditorPermissionMixin, generics.RetrieveAPIView):
     queryset = Product.objects.all()
     serializer_class = ProductSerializer
 
     # lookup_field = 'pk'
 
-class ProductUpdateAPIView(StaffEditorPermissionMixin, generics.UpdateAPIView):
+class ProductUpdateAPIView(UserQuerySetMixin, StaffEditorPermissionMixin, generics.UpdateAPIView):
     queryset = Product.objects.all()
     serializer_class = ProductSerializer
 
@@ -46,7 +55,7 @@ class ProductUpdateAPIView(StaffEditorPermissionMixin, generics.UpdateAPIView):
         return super().perform_update(serializer)
 
 
-class ProductDestroyAPIView(StaffEditorPermissionMixin, generics.DestroyAPIView):
+class ProductDestroyAPIView(UserQuerySetMixin, StaffEditorPermissionMixin, generics.DestroyAPIView):
     queryset = Product.objects.all()
     serializer_class = ProductSerializer
 
